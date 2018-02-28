@@ -1,5 +1,4 @@
 # h8overflow
-<<<<<<< HEAD
 
 > A Vue.js project
 
@@ -20,6 +19,4 @@ npm run build --report
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-=======
 Bismillah
->>>>>>> d3b7578cbc3f6292635f1ab198ff4768528465b2
