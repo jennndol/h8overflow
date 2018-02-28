@@ -23,7 +23,7 @@
               <a class="btn-vote-question" @click="upVote(question.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
               <h1>10</h1>
               <a class="btn-vote-question" @click="downVote(question.id)"><span class="glyphicon glyphicon-chevron-down"></span></a><br>
-              <a class="btn-vote-question" @click="deleteQuestion(question.id)"><span class="glyphicon glyphicon-trash"></span></a>
+              <a v-show="question.uid == currentUser.uid" class="btn-vote-question" @click="deleteQ(question.id)"><span class="glyphicon glyphicon-trash"></span></a>
             </div>
           </div>
         </div>
@@ -48,9 +48,10 @@
                   </div>
                   <div class="col-xs-6">
                     <div class="answer-vote text-right">
-                      10
+                      {{ questionUpVoteTotal - questionDownVoteTotal }}
                       <a @click="upVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
                       <a @click="downVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+                      {{ question }}
                     </div>
                   </div>
               </div>
@@ -76,11 +77,16 @@ export default {
         isAccepted: false
       },
       questionUpVoteTotal: 0,
-      questionDownVoteTotal: 0
+      questionDownVoteTotal: 0,
+      currentUser: firebase.auth().currentUser
     }
   },
   methods: {
     ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion']),
+    deleteQ(id) {
+      this.deleteQuestion(id)
+      this.$router.push({name: 'home'})
+    },
     reply () {
       let form = this.form
       form.id = this.question.id
@@ -197,10 +203,11 @@ export default {
     },
     answers () {
       return this.$store.state.answers
+    },
+    questionVotes() {
+      // TODO: get votes
+      alert(this.question.id)
     }
-  },
-  created () {
-    this.calculateQuestionVotes(this.question.id)
   }
 }
 </script>

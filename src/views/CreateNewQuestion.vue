@@ -43,6 +43,7 @@ export default {
     ask () {
       let question = {...this.form}
       this.setQuestion(question)
+      this.$router.push({name: 'home'})
     }
   }
 }

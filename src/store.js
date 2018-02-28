@@ -8,9 +8,9 @@ let dbQuestion = db.collection('questions')
 
 export const store = new Vuex.Store({
   state: {
-    question: null,
-    questions: null,
-    answers: null
+    question: {},
+    questions: [],
+    answers: []
   },
   mutations: {
     SET_ANSWER (state, payload) {
@@ -48,6 +48,7 @@ export const store = new Vuex.Store({
           console.log('Error getting documents', err)
         })
     },
+    
     getQuestions: ({ commit }) => {
       dbQuestion.get()
         .then(snapshot => {
@@ -64,8 +65,9 @@ export const store = new Vuex.Store({
         })
     },
     getQuestion: ({ commit }, payload) => {
-      dbQuestion.doc(payload).get()
-        .then(doc => {
+      dbQuestion.doc(payload).onSnapshot( function (doc) {
+        console.log(doc)
+        
           let data = doc.data()
           data.id = doc.id
           commit('DEFINE_QUESTION', data)

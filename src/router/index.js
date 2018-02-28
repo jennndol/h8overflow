@@ -63,6 +63,7 @@ let router = new Router({
 //       if (to.path == '/login') {
 //         next('/questions')
 //       }
+//       next('')
 //     } else {
 //       next('/login')
 //     }
