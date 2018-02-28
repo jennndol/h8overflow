@@ -216,7 +216,6 @@
       },
       calculateQuestionVotes(questionId) {
         db.collection('questions').doc(questionId).collection('votes')
-          .where('vote', '==', 'true')
           .get()
           .then(snapshot => {
             if (snapshot.docs.length != 0) {
