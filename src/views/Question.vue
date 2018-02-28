@@ -27,7 +27,7 @@
                   <span class="glyphicon glyphicon-chevron-down"></span>
                 </a>
                 <br>
-                <a v-show="question.uid == currentUser.uid" class="btn-vote-question" @click="deleteQ(question.id)">
+                <a v-show="question.uid === currentUser.uid" class="btn-vote-question" @click="deleteQ(question.id)">
                   <span class="glyphicon glyphicon-trash"></span>
                 </a>
               </div>
@@ -61,8 +61,9 @@
                       <a @click="downVoteAnswer(question.id, answer.id)">
                         <span class="glyphicon glyphicon-chevron-down"></span>
                       </a>
-                      {{ question }}
-                      <a @click="calculateQuestionVotes(question.id)">QUESTION</a>
+                      <a @click="deleteA(question.id, answer.id)">
+                        <span class="glyphicon glyphicon-trash-alt">Delete</span>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -76,179 +77,193 @@
 </template>
 
 <script>
-  import {
-    mapActions
-  } from 'vuex'
-  import {
-    db,
-    firebase
-  } from '../firebase'
+import {
+  mapActions
+} from 'vuex'
+import {
+  db,
+  firebase
+} from '../firebase'
 
-  export default {
-    data() {
-      return {
-        id: this.$route.params.id,
-        form: {
-          description: null,
-          isAccepted: false
-        },
-        questionUpVoteTotal: 0,
-        questionDownVoteTotal: 0,
-        currentUser: firebase.auth().currentUser
-      }
+export default {
+  data() {
+    return {
+      id: this.$route.params.id,
+      form: {
+        description: null,
+        isAccepted: false
+      },
+      questionUpVoteTotal: 0,
+      questionDownVoteTotal: 0,
+      currentUser: firebase.auth().currentUser
+    }
+  },
+  methods: {
+    ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion', 'getQuestionVotes']),
+    deleteQ (id) {
+      this.deleteQuestion(id)
+      this.$router.push({
+        name: 'questions'
+      })
     },
-    methods: {
-      ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion', 'getQuestionVotes']),
-      deleteQ(id) {
-        this.deleteQuestion(id)
-        this.$router.push({
-          name: 'questions'
+    deleteA (questionId, answerId) {
+      db.collection('questions').doc(questionId).collection('answers').doc(answerId).delete()
+      .then(payload => {
+        this.$router.push({name: 'questions'})
+      })
+      .catch(error => {
+        console.log(error)
+      })
+    },
+    reply () {
+      let form = this.form
+      form.id = this.question.id
+      this.setAnswer(form)
+    },
+    upVote (id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions').doc(id).collection('votes')
+        .where('uid', '===', currentUser.uid)
+        .get()
+        .then(snapshot => {
+          if (snapshot.docs.length === 0) {
+            db.collection('questions')
+              .doc(id).collection('votes')
+              .add({
+                uid: currentUser.uid,
+                vote: true
+              })
+          } else {
+            snapshot.forEach(doc => {
+              db.collection('questions')
+                .doc(id).collection('votes').doc(doc.id)
+                .update({
+                  vote: true
+                })
+            })
+          }
         })
-      },
-      reply() {
-        let form = this.form
-        form.id = this.question.id
-        this.setAnswer(form)
-      },
-      upVote(id) {
-        let currentUser = firebase.auth().currentUser
-        db.collection('questions').doc(id).collection('votes')
-          .where('uid', '==', currentUser.uid)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length == 0) {
-              db.collection('questions')
-                .doc(id).collection('votes')
-                .add({
-                  uid: currentUser.uid,
-                  vote: true
-                })
-            } else {
-              snapshot.forEach(doc => {
-                db.collection('questions')
-                  .doc(id).collection('votes').doc(doc.id)
-                  .update({
-                    vote: true
-                  })
+    },
+    downVote (id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions').doc(id).collection('votes')
+        .where('uid', '==', currentUser.uid)
+        .get()
+        .then(snapshot => {
+          if (snapshot.docs.length === 0) {
+            db.collection('questions')
+              .doc(id).collection('votes')
+              .add({
+                uid: currentUser.uid,
+                vote: false
               })
-            }
-          })
-      },
-      downVote(id) {
-        let currentUser = firebase.auth().currentUser
-        db.collection('questions').doc(id).collection('votes')
-          .where('uid', '==', currentUser.uid)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length == 0) {
+          } else {
+            snapshot.forEach(doc => {
               db.collection('questions')
-                .doc(id).collection('votes')
-                .add({
-                  uid: currentUser.uid,
+                .doc(id).collection('votes').doc(doc.id)
+                .update({
                   vote: false
                 })
-            } else {
-              snapshot.forEach(doc => {
-                db.collection('questions')
-                  .doc(id).collection('votes').doc(doc.id)
-                  .update({
-                    vote: false
-                  })
+            })
+          }
+        })
+    },
+    upVoteAnswer (questionId, id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions')
+        .doc(questionId).collection('answers')
+        .doc(id).collection('votes')
+        .where('uid', '==', currentUser.uid)
+        .get()
+        .then(snapshot => {
+          if (snapshot.docs.length === 0) {
+            db.collection('questions')
+              .doc(questionId).collection('answers')
+              .doc(id).collection('votes')
+              .add({
+                uid: currentUser.uid,
+                vote: true
               })
-            }
-          })
-      },
-      upVoteAnswer(questionId, id) {
-        let currentUser = firebase.auth().currentUser
-        db.collection('questions')
-          .doc(questionId).collection('answers')
-          .doc(id).collection('votes')
-          .where('uid', '==', currentUser.uid)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length == 0) {
+          } else {
+            snapshot.forEach(doc => {
               db.collection('questions')
-                .doc(questionId).collection('answers')
-                .doc(id).collection('votes')
-                .add({
-                  uid: currentUser.uid,
+                .doc(questionId).collection('answers').doc(id)
+                .collection('votes').doc(doc.id)
+                .update({
                   vote: true
                 })
-            } else {
-              snapshot.forEach(doc => {
-                db.collection('questions')
-                  .doc(questionId).collection('answers').doc(id)
-                  .collection('votes').doc(doc.id)
-                  .update({
-                    vote: true
-                  })
+            })
+          }
+        })
+    },
+    downVoteAnswer (questionId, id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions')
+        .doc(questionId).collection('answers')
+        .doc(id).collection('votes')
+        .where('uid', '==', currentUser.uid)
+        .get()
+        .then(snapshot => {
+          if (snapshot.docs.length === 0) {
+            db.collection('questions')
+              .doc(questionId).collection('answers')
+              .doc(id).collection('votes')
+              .add({
+                uid: currentUser.uid,
+                vote: false
               })
-            }
-          })
-      },
-      downVoteAnswer(questionId, id) {
-        let currentUser = firebase.auth().currentUser
-        db.collection('questions')
-          .doc(questionId).collection('answers')
-          .doc(id).collection('votes')
-          .where('uid', '==', currentUser.uid)
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length == 0) {
+          } else {
+            snapshot.forEach(doc => {
               db.collection('questions')
-                .doc(questionId).collection('answers')
-                .doc(id).collection('votes')
-                .add({
-                  uid: currentUser.uid,
+                .doc(questionId).collection('answers').doc(id)
+                .collection('votes').doc(doc.id)
+                .update({
                   vote: false
                 })
-            } else {
-              snapshot.forEach(doc => {
-                db.collection('questions')
-                  .doc(questionId).collection('answers').doc(id)
-                  .collection('votes').doc(doc.id)
-                  .update({
-                    vote: false
-                  })
-              })
-            }
-          })
-      },
-      calculateQuestionVotes(questionId) {
-        db.collection('questions').doc(questionId).collection('votes')
-          .get()
-          .then(snapshot => {
-            if (snapshot.docs.length != 0) {
-              snapshot.forEach(doc => {
-                db.collection('questions')
-                  .doc(questionId).collection('votes')
-                  .get().then(docs => {
-                    alert(docs)
-                    console.log(docs)
-                  })
-              })
-            }
-          })
-      },
-      questionVotes() {
-        this.calculateQuestionVotes(this.$store.state.question.id)
-      }
+            })
+          }
+        })
     },
-    created() {
-      this.getQuestion(this.id)
-      this.getAnswers(this.id)
-      this.questionVotes()
+    calculateQuestionVotes (questionId) {
+      console.log('WOY')
+      
+      db.collection('questions').doc(questionId).collection('votes')
+        .get()
+        .then(snapshot => {
+          if (snapshot.docs.length !== 0) {
+            snapshot.forEach(doc => {
+              db.collection('questions')
+                .doc(questionId).collection('votes')
+                .get()
+                .then(docs => {
+                  console.log(docs)
+                })
+                .catch(error => {
+                  console.log(error)
+                })
+            })
+          }
+        })
     },
-    computed: {
-      question() {
-        return this.$store.state.question
-      },
-      answers() {
-        return this.$store.state.answers
-      }
+    questionVotes () {
+      this.calculateQuestionVotes(this.$store.state.question.id)
+    }
+  },
+  created () {
+    this.getQuestion(this.id)
+    this.getAnswers(this.id)
+    this.questionVotes()
+    this.calculateQuestionVotes(this.$store.state.question.id)
+  },
+  computed: {
+    question () {
+      return this.$store.state.question
+    },
+    answers () {
+      return this.$store.state.answers
     }
   }
-
+}
 </script>
 
 <style scoped>
@@ -257,26 +272,20 @@
     border-radius: 50%;
     margin-right: 1em;
   }
-
   .btn-vote-question {
     font-size: 1.5em;
   }
-
   .panel-group {
     margin-left: 3em;
   }
-
   .question-vote {
     text-align: center;
     cursor: pointer;
   }
-
   .answer-vote a {
     cursor: pointer;
   }
-
   .page-header {
     margin-top: -0.3em;
   }
-
 </style>
