@@ -14,7 +14,7 @@
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li>
-            <router-link to="/questions">Q&A</router-link>
+            <router-link to="/">Q&A</router-link>
           </li>
           <li>
             <router-link to="/ask">ASK</router-link>
@@ -23,7 +23,7 @@
         <ul class="nav navbar-nav navbar-right">
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-              <img v-bind:src="image" class="profile"> John Doe
+              John Doe
               <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">

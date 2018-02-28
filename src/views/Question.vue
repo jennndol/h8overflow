@@ -1,59 +1,71 @@
 <template>
-<div>
-<div class="container">
-    <div class="panel-group">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <router-link :to="{ name: 'question', params: { id: question.id }}">{{ question.title }}</router-link>          
-        </div>
-        <div class="panel-body">
-          <div class="col-xs-10">
-            <p>
-              <img class="profile-picture" src="https://api.adorable.io/avatars/285/abott@adorable.png">
-              {{ question.description }}
-            </p>
-            <label class="label label-primary">Mongoose</label>
-            <label class="label label-primary">Javascript</label>
-            <label class="label label-primary">PostgreSQL</label>
-            <label class="label label-primary">Sequelize</label>
-            <label class="label label-primary">Firebase</label>
+  <div>
+    <div class="container">
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <router-link :to="{ name: 'question', params: { id: question.id }}">{{ question.title }}</router-link>
           </div>
-          <div class="col-xs-2">
-            <div class="question-vote">
-              <a class="btn-vote-question" @click="upVote(question.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
-              <h1>10</h1>
-              <a class="btn-vote-question" @click="downVote(question.id)"><span class="glyphicon glyphicon-chevron-down"></span></a><br>
-              <a v-show="question.uid == currentUser.uid" class="btn-vote-question" @click="deleteQ(question.id)"><span class="glyphicon glyphicon-trash"></span></a>
+          <div class="panel-body">
+            <div class="col-xs-10">
+              <p>
+                <img class="profile-picture" src="https://api.adorable.io/avatars/285/abott@adorable.png"> {{ question.description }}
+              </p>
+              <label class="label label-primary">Mongoose</label>
+              <label class="label label-primary">Javascript</label>
+              <label class="label label-primary">PostgreSQL</label>
+              <label class="label label-primary">Sequelize</label>
+              <label class="label label-primary">Firebase</label>
+            </div>
+            <div class="col-xs-2">
+              <div class="question-vote">
+                <a class="btn-vote-question" @click="upVote(question.id)">
+                  <span class="glyphicon glyphicon-chevron-up"></span>
+                </a>
+                <h1>10</h1>
+                <a class="btn-vote-question" @click="downVote(question.id)">
+                  <span class="glyphicon glyphicon-chevron-down"></span>
+                </a>
+                <br>
+                <a v-show="question.uid == currentUser.uid" class="btn-vote-question" @click="deleteQ(question.id)">
+                  <span class="glyphicon glyphicon-trash"></span>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="panel-footer">
-          <div class="page-header">
-            <h4>Answers</h4>
-          </div>
-          <div class="form-group">
-            <label for="comment">Comment:</label>
-            <textarea class="form-control" rows="3" v-model="form.description" placeholder="description"></textarea>
-          </div>
-          <div class="form-group text-right">
-            <button @click="reply" type="button" class="btn btn-primary btn-sm">Comment</button>
-          </div>
-          <hr>
-          <div class="panel-group" v-for="answer in answers" :key="answer.id">
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <p>{{ answer.description }}</p>
+          <div class="panel-footer">
+            <div class="page-header">
+              <h4>Answers</h4>
+            </div>
+            <div class="form-group">
+              <label for="comment">Comment:</label>
+              <textarea class="form-control" rows="3" v-model="form.description" placeholder="description"></textarea>
+            </div>
+            <div class="form-group text-right">
+              <button @click="reply" type="button" class="btn btn-primary btn-sm">Comment</button>
+            </div>
+            <hr>
+            <div class="panel-group" v-for="answer in answers" :key="answer.id">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <p>{{ answer.description }}</p>
                   <div class="col-xs-6">
                     <small>[uid {{ answer.uid }}]</small>
                   </div>
                   <div class="col-xs-6">
                     <div class="answer-vote text-right">
                       {{ questionUpVoteTotal - questionDownVoteTotal }}
-                      <a @click="upVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
-                      <a @click="downVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+                      <a @click="upVoteAnswer(question.id, answer.id)">
+                        <span class="glyphicon glyphicon-chevron-up"></span>
+                      </a>
+                      <a @click="downVoteAnswer(question.id, answer.id)">
+                        <span class="glyphicon glyphicon-chevron-down"></span>
+                      </a>
                       {{ question }}
+                      <a @click="calculateQuestionVotes(question.id)">QUESTION</a>
                     </div>
                   </div>
+                </div>
               </div>
             </div>
           </div>
@@ -61,177 +73,211 @@
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import { db, firebase } from '../firebase'
+  import {
+    mapActions
+  } from 'vuex'
+  import {
+    db,
+    firebase
+  } from '../firebase'
 
-export default {
-  data(){
-    return {
-      id: this.$route.params.id,
-      form: {
-        description: null,
-        isAccepted: false
+  export default {
+    data() {
+      return {
+        id: this.$route.params.id,
+        form: {
+          description: null,
+          isAccepted: false
+        },
+        questionUpVoteTotal: 0,
+        questionDownVoteTotal: 0,
+        currentUser: firebase.auth().currentUser
+      }
+    },
+    methods: {
+      ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion', 'getQuestionVotes']),
+      deleteQ(id) {
+        this.deleteQuestion(id)
+        this.$router.push({
+          name: 'questions'
+        })
       },
-      questionUpVoteTotal: 0,
-      questionDownVoteTotal: 0,
-      currentUser: firebase.auth().currentUser
-    }
-  },
-  methods: {
-    ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion']),
-    deleteQ(id) {
-      this.deleteQuestion(id)
-      this.$router.push({name: 'home'})
-    },
-    reply () {
-      let form = this.form
-      form.id = this.question.id
-      this.setAnswer(form)
-    },
-    upVote (id) {
-      let currentUser = firebase.auth().currentUser
-      db.collection('questions').doc(id).collection('votes')
-      .where('uid', '==', currentUser.uid)
-      .get()
-      .then(snapshot => {
-        if (snapshot.docs.length==0) {
-          db.collection('questions')
-          .doc(id).collection('votes')
-          .add({uid: currentUser.uid, vote: true})
-        } else {
-          snapshot.forEach(doc => {
-            db.collection('questions')
-            .doc(id).collection('votes').doc(doc.id)
-            .update({vote: true})
+      reply() {
+        let form = this.form
+        form.id = this.question.id
+        this.setAnswer(form)
+      },
+      upVote(id) {
+        let currentUser = firebase.auth().currentUser
+        db.collection('questions').doc(id).collection('votes')
+          .where('uid', '==', currentUser.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.docs.length == 0) {
+              db.collection('questions')
+                .doc(id).collection('votes')
+                .add({
+                  uid: currentUser.uid,
+                  vote: true
+                })
+            } else {
+              snapshot.forEach(doc => {
+                db.collection('questions')
+                  .doc(id).collection('votes').doc(doc.id)
+                  .update({
+                    vote: true
+                  })
+              })
+            }
           })
-        }
-      })
-    },
-    downVote (id) {
-      let currentUser = firebase.auth().currentUser
-      db.collection('questions').doc(id).collection('votes')
-      .where('uid', '==', currentUser.uid)
-      .get()
-      .then(snapshot => {
-        if (snapshot.docs.length==0) {
-          db.collection('questions')
-          .doc(id).collection('votes')
-          .add({uid: currentUser.uid, vote: false})
-        } else {
-          snapshot.forEach(doc => {
-            db.collection('questions')
-            .doc(id).collection('votes').doc(doc.id)
-            .update({vote: false})
+      },
+      downVote(id) {
+        let currentUser = firebase.auth().currentUser
+        db.collection('questions').doc(id).collection('votes')
+          .where('uid', '==', currentUser.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.docs.length == 0) {
+              db.collection('questions')
+                .doc(id).collection('votes')
+                .add({
+                  uid: currentUser.uid,
+                  vote: false
+                })
+            } else {
+              snapshot.forEach(doc => {
+                db.collection('questions')
+                  .doc(id).collection('votes').doc(doc.id)
+                  .update({
+                    vote: false
+                  })
+              })
+            }
           })
-        }
-      })
-    },
-    upVoteAnswer(questionId, id) {
-      let currentUser = firebase.auth().currentUser
-      db.collection('questions')
-      .doc(questionId).collection('answers')
-      .doc(id).collection('votes')
-      .where('uid', '==', currentUser.uid)
-      .get()
-      .then(snapshot => {
-        if (snapshot.docs.length==0) {
-          db.collection('questions')
+      },
+      upVoteAnswer(questionId, id) {
+        let currentUser = firebase.auth().currentUser
+        db.collection('questions')
           .doc(questionId).collection('answers')
           .doc(id).collection('votes')
-          .add({uid: currentUser.uid, vote: true})
-        } else {
-          snapshot.forEach(doc => {
-            db.collection('questions')
-            .doc(questionId).collection('answers').doc(id)
-            .collection('votes').doc(doc.id)
-            .update({vote: true})
+          .where('uid', '==', currentUser.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.docs.length == 0) {
+              db.collection('questions')
+                .doc(questionId).collection('answers')
+                .doc(id).collection('votes')
+                .add({
+                  uid: currentUser.uid,
+                  vote: true
+                })
+            } else {
+              snapshot.forEach(doc => {
+                db.collection('questions')
+                  .doc(questionId).collection('answers').doc(id)
+                  .collection('votes').doc(doc.id)
+                  .update({
+                    vote: true
+                  })
+              })
+            }
           })
-        }
-      })
-    },
-    downVoteAnswer(questionId, id) {      
-      let currentUser = firebase.auth().currentUser
-      db.collection('questions')
-      .doc(questionId).collection('answers')
-      .doc(id).collection('votes')
-      .where('uid', '==', currentUser.uid)
-      .get()
-      .then(snapshot => {
-        if (snapshot.docs.length==0) {
-          db.collection('questions')
+      },
+      downVoteAnswer(questionId, id) {
+        let currentUser = firebase.auth().currentUser
+        db.collection('questions')
           .doc(questionId).collection('answers')
           .doc(id).collection('votes')
-          .add({uid: currentUser.uid, vote: false})
-        } else {
-          snapshot.forEach(doc => {
-            db.collection('questions')
-            .doc(questionId).collection('answers').doc(id)
-            .collection('votes').doc(doc.id)
-            .update({vote: false})
+          .where('uid', '==', currentUser.uid)
+          .get()
+          .then(snapshot => {
+            if (snapshot.docs.length == 0) {
+              db.collection('questions')
+                .doc(questionId).collection('answers')
+                .doc(id).collection('votes')
+                .add({
+                  uid: currentUser.uid,
+                  vote: false
+                })
+            } else {
+              snapshot.forEach(doc => {
+                db.collection('questions')
+                  .doc(questionId).collection('answers').doc(id)
+                  .collection('votes').doc(doc.id)
+                  .update({
+                    vote: false
+                  })
+              })
+            }
           })
-        }
-      })
-    },
-    calculateQuestionVotes(questionId) {
-      db.collection('questions').doc(id).collection('votes')
-      .where('vote', '==', 'true')
-      .get()
-      .then(snapshot => {
-        if (snapshot.docs.length != 0) {
-          snapshot.forEach(doc => {
-            db.collection('questions')
-            .doc(id).collection('votes')
-            .get().then(docs => {
-              console.log(docs)
-            })
+      },
+      calculateQuestionVotes(questionId) {
+        db.collection('questions').doc(questionId).collection('votes')
+          .where('vote', '==', 'true')
+          .get()
+          .then(snapshot => {
+            if (snapshot.docs.length != 0) {
+              snapshot.forEach(doc => {
+                db.collection('questions')
+                  .doc(questionId).collection('votes')
+                  .get().then(docs => {
+                    alert(docs)
+                    console.log(docs)
+                  })
+              })
+            }
           })
-        }
-      })
-    }
-  },
-  mounted () {
-    this.getQuestion(this.id)
-    this.getAnswers(this.id)
-  },
-  computed: {
-    question () {
-      return this.$store.state.question
+      },
+      questionVotes() {
+        this.calculateQuestionVotes(this.$store.state.question.id)
+      }
     },
-    answers () {
-      return this.$store.state.answers
+    created() {
+      this.getQuestion(this.id)
+      this.getAnswers(this.id)
+      this.questionVotes()
     },
-    questionVotes() {
-      // TODO: get votes
-      alert(this.question.id)
+    computed: {
+      question() {
+        return this.$store.state.question
+      },
+      answers() {
+        return this.$store.state.answers
+      }
     }
   }
-}
+
 </script>
 
 <style scoped>
-.profile-picture{
-  width: 100px;
-  border-radius: 50%;
-  margin-right: 1em;
-}
-.btn-vote-question{
-  font-size: 1.5em;
-}
-.panel-group{
-  margin-left: 3em;
-}
-.question-vote{
-  text-align: center;
-  cursor: pointer;
-}
-.answer-vote a{
-  cursor: pointer;
-}
-.page-header{
-  margin-top: -0.3em;
-}
+  .profile-picture {
+    width: 100px;
+    border-radius: 50%;
+    margin-right: 1em;
+  }
+
+  .btn-vote-question {
+    font-size: 1.5em;
+  }
+
+  .panel-group {
+    margin-left: 3em;
+  }
+
+  .question-vote {
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .answer-vote a {
+    cursor: pointer;
+  }
+
+  .page-header {
+    margin-top: -0.3em;
+  }
+
 </style>

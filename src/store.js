@@ -10,7 +10,8 @@ export const store = new Vuex.Store({
   state: {
     question: {},
     questions: [],
-    answers: []
+    answers: [],
+    votes: []
   },
   mutations: {
     SET_ANSWER (state, payload) {
@@ -65,16 +66,20 @@ export const store = new Vuex.Store({
         })
     },
     getQuestion: ({ commit }, payload) => {
-      dbQuestion.doc(payload).onSnapshot( function (doc) {
-        console.log(doc)
-        
-          let data = doc.data()
-          data.id = doc.id
-          commit('DEFINE_QUESTION', data)
-        })
-        .catch(err => {
-          console.log('Error getting documents', err)
-        })
+      dbQuestion.doc(payload).onSnapshot(function (doc) {
+        let data = doc.data()
+        data.id = doc.id
+        commit('DEFINE_QUESTION', data)
+      }, err => {
+        console.log(`Encountered error: ${err}`)
+      })
+    },
+    getQuestionVotes: ({commit}, payload) => {
+      alert('IM HERE')
+      dbQuestion.doc(payload).collection('votes')
+      .onSnapshot(something => {
+        console.log(something)
+      })
     },
     deleteQuestion: ({commit}, payload) => {
       dbQuestion.doc(payload).delete()

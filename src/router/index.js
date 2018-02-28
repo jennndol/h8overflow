@@ -6,7 +6,6 @@ import SignUp from '@/views/SignUp'
 import CreateNewQuestion from '@/views/CreateNewQuestion'
 import Bucket from '@/views/Bucket'
 import Question from '@/views/Question'
-import Home from '@/views/Home'
 
 import { firebase } from '../firebase'
 
@@ -15,11 +14,6 @@ Vue.use(Router)
 let router = new Router({
   mode: 'history',
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Questions
-    },
     {
       path: '/login',
       name: 'login',
@@ -39,13 +33,14 @@ let router = new Router({
       }
     },
     {
-      path: '/questions',
+      path: '/',
       component: Bucket,
       children:[{
         path: '',
         name: 'questions',
-        component: Questions,
-      },{
+        component: Questions
+      },
+      {
         path: ':id',
         name: 'question',
         component: Question
@@ -57,22 +52,10 @@ let router = new Router({
   ]
 })
 
-// router.beforeEach((to, from, next) => {
-//   firebase.auth().onAuthStateChanged(user => {    
-//     if (user) {
-//       if (to.path == '/login') {
-//         next('/questions')
-//       }
-//       next('')
-//     } else {
-//       next('/login')
-//     }
-//   })
-// })
+router.beforeEach((to, from, next) => {
+  firebase.auth().onAuthStateChanged(user => {
+    next()
+  })
+})
 
 export default router
-
-//: TODO LIST
-// FIX ROUTER BEFORE EACH BUG
-// GET VOTES NUMBER
-// CRON JOB
