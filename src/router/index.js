@@ -71,3 +71,8 @@ let router = new Router({
 // })
 
 export default router
+
+//: TODO LIST
+// FIX ROUTER BEFORE EACH BUG
+// GET VOTES NUMBER
+// CRON JOB
