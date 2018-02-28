@@ -16,7 +16,7 @@ export const store = new Vuex.Store({
     SET_ANSWER (state, payload) {
       state.answers.push(payload)
     },
-    DEFINE_ANSWERS (state, payload){
+    DEFINE_ANSWERS (state, payload) {
       state.answers = payload
     },
     SET_QUESTION (state, payload) {
@@ -25,14 +25,14 @@ export const store = new Vuex.Store({
     DEFINE_QUESTIONS (state, payload) {
       state.questions = payload
     },
-    DEFINE_QUESTION (state, payload){
+    DEFINE_QUESTION (state, payload) {
       state.question = payload
     },
     SPLICE_QUESTIONS (state, payload) {
       console.log(payload)
     }
   },
-  actions:{
+  actions: {
     getAnswers: ({commit}, payload) => {
       dbQuestion.doc(payload).collection('answers').get()
         .then(snapshot => {
@@ -48,7 +48,7 @@ export const store = new Vuex.Store({
           console.log('Error getting documents', err)
         })
     },
-    getQuestions: ({ commit }) => {      
+    getQuestions: ({ commit }) => {
       dbQuestion.get()
         .then(snapshot => {
           let docs = []
@@ -66,12 +66,43 @@ export const store = new Vuex.Store({
     getQuestion: ({ commit }, payload) => {
       dbQuestion.doc(payload).get()
         .then(doc => {
-            let data = doc.data()
-            data.id = doc.id
+          let data = doc.data()
+          data.id = doc.id
           commit('DEFINE_QUESTION', data)
         })
         .catch(err => {
           console.log('Error getting documents', err)
+        })
+    },
+    deleteQuestion: ({commit}, payload) => {
+      dbQuestion.doc(payload).delete()
+        .then(() => {
+          alert('Berhasil')
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
+    setVote: ({ commit }, payload) => {
+      // TODO: Check this out
+      let currentUser = firebase.auth().currentUser
+      dbQuestion.doc(payload.id).collection('votes').add({
+        [currentUser.uid]: payload
+      })
+        .then(function (doc) {
+          dbQuestion.doc(payload.id).collection('votes').doc(doc.id).get()
+            .then(val => {
+              let data = val.data()
+              data.id = val.id
+              data.questionid = payload.id
+              commit('SET_VOTE', data)
+            })
+            .catch(error => {
+              console.log(error)
+            })
+        })
+        .catch(function (error) {
+          console.error('Error adding document: ', error)
         })
     },
     setAnswer: ({commit}, payload) => {
@@ -82,15 +113,15 @@ export const store = new Vuex.Store({
       })
         .then(function (doc) {
           dbQuestion.doc(payload.id).collection('answers').doc(doc.id).get()
-          .then(val => {
-            let data = val.data()
-            data.id = val.id
-            data.questionid = payload.id
-            commit('SET_ANSWER', data)
-          })
-          .catch(error => {
-            console.log(error);
-          })
+            .then(val => {
+              let data = val.data()
+              data.id = val.id
+              data.questionid = payload.id
+              commit('SET_ANSWER', data)
+            })
+            .catch(error => {
+              console.log(error)
+            })
         })
         .catch(function (error) {
           console.error('Error adding document: ', error)
@@ -106,21 +137,16 @@ export const store = new Vuex.Store({
         .then(function (doc) {
           doc.onSnapshot(docSnapshot => {
             dbQuestion.doc(doc.id).get()
-            .then(doc => {
-              let data = doc.data()
-              data.id = doc.id
-              commit('SET_QUESTION', data)
-            })
+              .then(doc => {
+                let data = doc.data()
+                data.id = doc.id
+                commit('SET_QUESTION', data)
+              })
           })
         })
         .catch(function (error) {
           console.error('Error adding document: ', error)
         })
-    },
-    logout () {
-      firebase.auth().signOut().then(() => {
-        this.$router.replace('login')
-      })
-    },
+    }
   }
 })

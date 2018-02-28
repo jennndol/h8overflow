@@ -14,7 +14,7 @@
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li>
-            <a>Q&A</a>
+            <router-link to="/questions">Q&A</router-link>
           </li>
           <li>
             <router-link to="/ask">ASK</router-link>
@@ -46,10 +46,15 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { firebase } from '../../firebase'
+
 export default {
   methods: {
-    ...mapActions(['logout'])
+    logout () {
+      firebase.auth().signOut().then(() => {
+        this.$router.replace('login')
+      })
+    }
   }
 }
 </script>

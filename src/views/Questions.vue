@@ -44,9 +44,6 @@ export default {
 .btn-vote-question{
       font-size: 1.5em;
 }
-.panel-group{
-  margin-left: 3em;
-}
 .question-vote{
   text-align: center;
   cursor: pointer;

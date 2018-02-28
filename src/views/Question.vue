@@ -20,9 +20,10 @@
           </div>
           <div class="col-xs-2">
             <div class="question-vote">
-              <a class="btn-vote-question"><span class="glyphicon glyphicon-chevron-up"></span></a>
+              <a class="btn-vote-question" @click="upVote(question.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
               <h1>10</h1>
-              <a class="btn-vote-question"><span class="glyphicon glyphicon-chevron-down"></span></a>
+              <a class="btn-vote-question" @click="downVote(question.id)"><span class="glyphicon glyphicon-chevron-down"></span></a><br>
+              <a class="btn-vote-question" @click="deleteQuestion(question.id)"><span class="glyphicon glyphicon-trash"></span></a>
             </div>
           </div>
         </div>
@@ -48,8 +49,8 @@
                   <div class="col-xs-6">
                     <div class="answer-vote text-right">
                       10
-                      <a><span class="glyphicon glyphicon-chevron-up"></span></a>
-                      <a><span class="glyphicon glyphicon-chevron-down"></span></a>
+                      <a @click="upVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-up"></span></a>
+                      <a @click="downVoteAnswer(question.id, answer.id)"><span class="glyphicon glyphicon-chevron-down"></span></a>
                     </div>
                   </div>
               </div>
@@ -64,6 +65,7 @@
 
 <script>
 import { mapActions } from 'vuex'
+import { db, firebase } from '../firebase'
 
 export default {
   data(){
@@ -71,17 +73,118 @@ export default {
       id: this.$route.params.id,
       form: {
         description: null,
-        isAccepted: false,
-        votes: []
-      }
+        isAccepted: false
+      },
+      questionUpVoteTotal: 0,
+      questionDownVoteTotal: 0
     }
   },
   methods: {
-    ...mapActions(['getQuestion', 'setAnswer', 'getAnswers']),
+    ...mapActions(['getQuestion', 'setAnswer', 'getAnswers', 'deleteQuestion']),
     reply () {
       let form = this.form
       form.id = this.question.id
       this.setAnswer(form)
+    },
+    upVote (id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions').doc(id).collection('votes')
+      .where('uid', '==', currentUser.uid)
+      .get()
+      .then(snapshot => {
+        if (snapshot.docs.length==0) {
+          db.collection('questions')
+          .doc(id).collection('votes')
+          .add({uid: currentUser.uid, vote: true})
+        } else {
+          snapshot.forEach(doc => {
+            db.collection('questions')
+            .doc(id).collection('votes').doc(doc.id)
+            .update({vote: true})
+          })
+        }
+      })
+    },
+    downVote (id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions').doc(id).collection('votes')
+      .where('uid', '==', currentUser.uid)
+      .get()
+      .then(snapshot => {
+        if (snapshot.docs.length==0) {
+          db.collection('questions')
+          .doc(id).collection('votes')
+          .add({uid: currentUser.uid, vote: false})
+        } else {
+          snapshot.forEach(doc => {
+            db.collection('questions')
+            .doc(id).collection('votes').doc(doc.id)
+            .update({vote: false})
+          })
+        }
+      })
+    },
+    upVoteAnswer(questionId, id) {
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions')
+      .doc(questionId).collection('answers')
+      .doc(id).collection('votes')
+      .where('uid', '==', currentUser.uid)
+      .get()
+      .then(snapshot => {
+        if (snapshot.docs.length==0) {
+          db.collection('questions')
+          .doc(questionId).collection('answers')
+          .doc(id).collection('votes')
+          .add({uid: currentUser.uid, vote: true})
+        } else {
+          snapshot.forEach(doc => {
+            db.collection('questions')
+            .doc(questionId).collection('answers').doc(id)
+            .collection('votes').doc(doc.id)
+            .update({vote: true})
+          })
+        }
+      })
+    },
+    downVoteAnswer(questionId, id) {      
+      let currentUser = firebase.auth().currentUser
+      db.collection('questions')
+      .doc(questionId).collection('answers')
+      .doc(id).collection('votes')
+      .where('uid', '==', currentUser.uid)
+      .get()
+      .then(snapshot => {
+        if (snapshot.docs.length==0) {
+          db.collection('questions')
+          .doc(questionId).collection('answers')
+          .doc(id).collection('votes')
+          .add({uid: currentUser.uid, vote: false})
+        } else {
+          snapshot.forEach(doc => {
+            db.collection('questions')
+            .doc(questionId).collection('answers').doc(id)
+            .collection('votes').doc(doc.id)
+            .update({vote: false})
+          })
+        }
+      })
+    },
+    calculateQuestionVotes(questionId) {
+      db.collection('questions').doc(id).collection('votes')
+      .where('vote', '==', 'true')
+      .get()
+      .then(snapshot => {
+        if (snapshot.docs.length != 0) {
+          snapshot.forEach(doc => {
+            db.collection('questions')
+            .doc(id).collection('votes')
+            .get().then(docs => {
+              console.log(docs)
+            })
+          })
+        }
+      })
     }
   },
   mounted () {
@@ -95,6 +198,9 @@ export default {
     answers () {
       return this.$store.state.answers
     }
+  },
+  created () {
+    this.calculateQuestionVotes(this.question.id)
   }
 }
 </script>

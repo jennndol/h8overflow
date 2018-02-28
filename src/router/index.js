@@ -6,6 +6,7 @@ import SignUp from '@/views/SignUp'
 import CreateNewQuestion from '@/views/CreateNewQuestion'
 import Bucket from '@/views/Bucket'
 import Question from '@/views/Question'
+import Home from '@/views/Home'
 
 import { firebase } from '../firebase'
 
@@ -14,6 +15,11 @@ Vue.use(Router)
 let router = new Router({
   mode: 'history',
   routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: Questions
+    },
     {
       path: '/login',
       name: 'login',
@@ -28,9 +34,9 @@ let router = new Router({
       path: '/ask',
       name: 'ask',
       component: CreateNewQuestion,
-      // meta: {
-      //   requiresAuth: true
-      // }
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/questions',
@@ -57,8 +63,7 @@ let router = new Router({
 //       if (to.path == '/login') {
 //         next('/questions')
 //       }
-//       next()
-//     }else{
+//     } else {
 //       next('/login')
 //     }
 //   })
