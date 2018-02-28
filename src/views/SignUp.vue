@@ -1,5 +1,41 @@
 <template>
-<section class="hero is-fullheight">
+<div>
+    <div id="fullscreen_bg" class="fullscreen_bg" />
+    <div class="container">
+      <div class="row center-block">
+        <div class="col-md-4 col-md-offset-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <strong>Register</strong>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label>Email address</label>
+                <input type="email" class="form-control" v-model="email" placeholder="Email">
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" v-model="password" placeholder="Password">
+              </div>
+              <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" class="form-control" v-model="confirm" placeholder="Confirm Password">
+              </div>
+              <button v-on:click="signUp" class="btn btn-success btn-block">Register</button>
+              <div class="message">
+                <div class="alert alert-danger" v-show="errorMessage">{{errorMessage}}</div>
+                <div class="alert alert-success" v-show="successMessage">{{successMessage}}</div>
+              </div>
+            </div>
+            <div class="panel-footer">
+              <router-link to="login">Login here</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- <section class="hero is-fullheight">
     <div class="hero-body">
       <div class="container has-text-centered is-mobile">
         <div class="column">
@@ -32,6 +68,8 @@
       </div>
     </div>
   </section>
+
+ -->
 </template>
 
 <script>
@@ -41,7 +79,8 @@ export default {
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
+      confirm: ''
     }
   },
   methods: {
@@ -60,39 +99,26 @@ export default {
 </script>
 
 <style scoped>
-html,body {
-  font-family: 'Open Sans', serif;
-  font-size: 14px;
-  font-weight: 300;
-}
-.hero.is-success {
-  background: #F2F6FA;
-}
-.hero .nav, .hero.is-success .nav {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-.box {
-  margin-top: 5rem;
-}
-.avatar {
-  margin-top: -70px;
-  padding-bottom: 20px;
-}
-.avatar img {
-  padding: 5px;
-  background: #fff;
-  border-radius: 50%;
-  -webkit-box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
-  box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
-}
-input {
-  font-weight: 300;
-}
-p {
-  font-weight: 700;
-}
-p.subtitle {
-  padding-top: 1rem;
-}
+.message {
+    margin-top: 1em;
+  }
+  .center-block {
+    margin-top: 15%;
+  }
+  body {
+    padding-top: 120px;
+    padding-bottom: 40px;
+    background-color: #eee;
+  }
+  .fullscreen_bg {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-image: url('http://cleancanvas.herokuapp.com/img/backgrounds/color-splash.jpg');
+    background-repeat: repeat;
+  }
 </style>

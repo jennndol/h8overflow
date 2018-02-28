@@ -1,55 +1,55 @@
 <template>
-<nav class="navbar is-primary is-fixed-top">
-  <div class="container">
-    <div class="navbar-brand">
-      <a class="navbar-item">
-        Q&A
-      </a>
-      <div class="navbar-burger burger" data-target="navbar-menu">
-        <span></span>
-        <span></span>
-        <span></span>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+          aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">STACKOVERFLOW</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li>
+            <a>Q&A</a>
+          </li>
+          <li>
+            <router-link to="/ask">ASK</router-link>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <img v-bind:src="image" class="profile"> John Doe
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a>Profile</a>
+              </li>
+              <li role="separator" class="divider"></li>
+              <li>
+                <a>Edit Profile</a>
+              </li>
+              <li>
+                <a @click="logout()">Logout</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
-    <div id="navbar-menu" class="navbar-menu">
-      <div class="navbar-start">
-        <a class="navbar-item" href="https://bulma.io/">
-          Home
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
+  </nav>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
-  name: 'navbar',
-  created () {
-    document.addEventListener('DOMContentLoaded', function () {
-      // Get all "navbar-burger" elements
-      var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0)
-
-      // Check if there are any navbar burgers
-      if ($navbarBurgers.length > 0) {
-        // Add a click event on each of them
-        $navbarBurgers.forEach(function ($el) {
-          $el.addEventListener('click', function () {
-            // Get the target from the "data-target" attribute
-            var target = $el.dataset.target
-            var $target = document.getElementById(target)
-
-            // Toggle the class on both the "navbar-burger" and the "navbar-menu"
-            $el.classList.toggle('is-active')
-            $target.classList.toggle('is-active')
-          })
-        })
-      }
-    })
+  methods: {
+    ...mapActions(['logout'])
   }
 }
 </script>
-
-<style scoped>
-
-</style>

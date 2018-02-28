@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import firebase from 'firebase'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'createNewQuestion',
@@ -30,7 +30,7 @@ export default {
       form: {
         title: null,
         description: null,
-        tags: {},
+        tags: [],
         votes: 0,
         favorites: 0,
         hasAcceptedAnswer: false
@@ -38,18 +38,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['setQuestion']),
     ask () {
-      let currentUser = firebase.auth().currentUser
       let question = {...this.form}
-      question.uid = currentUser.uid
-      this.$db.collection('questions').add(question)
-        .then(function (docRef) {
-          alert('Success')
-          console.log('Document written with ID: ', docRef.id)
-        })
-        .catch(function (error) {
-          console.error('Error adding document: ', error)
-        })
+      this.setQuestion(question)
     }
   }
 }

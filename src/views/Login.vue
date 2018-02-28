@@ -1,42 +1,33 @@
 <template>
-<section class="hero is-fullheight">
-    <div class="hero-body">
-      <div class="container has-text-centered is-mobile">
-        <div class="column">
-          <h3 class="title has-text-grey">Login</h3>
-          <p class="subtitle has-text-grey">Please login to proceed.</p>
-          <div class="box">
-            <figure class="avatar">
-              <img src="https://placehold.it/128x128">
-            </figure>
-            <form v-on:submit.prevent>
-              <div class="field">
-                <div class="control">
-                  <input class="input is-large" v-model="email" type="email" placeholder="Your Email" autofocus="">
-                </div>
+  <div>
+    <div id="fullscreen_bg" class="fullscreen_bg" />
+    <div class="container">
+      <div class="row center-block">
+        <div class="col-md-4 col-md-offset-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <strong>Login</strong>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label>Email address</label>
+                <input type="email" class="form-control" v-model="email" placeholder="Email">
               </div>
-              <div class="field">
-                <div class="control">
-                  <input class="input is-large" v-model="password" type="password" placeholder="Your Password">
-                </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" v-model="password" placeholder="Password">
               </div>
-              <div class="field">
-                <label class="checkbox">
-                  <input type="checkbox">
-                  Remember me
-                </label>
-              </div>
-              <button class="button is-block is-info is-large is-fullwidth" @click="signIn">Login</button>
-            </form>
+              <button class="btn btn-primary btn-block" v-on:click="signIn">Login</button>
+              <div class="alert alert-danger" v-show="message">{{message}}</div>
+            </div>
+            <div class="panel-footer">
+              <router-link to="signup">Register here</router-link>
+            </div>
           </div>
-          <p class="has-text-grey">
-            <a href="/signup">Sign Up</a> &nbsp;·&nbsp;
-            <a href="../">Need Help?</a>
-          </p>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -47,15 +38,14 @@ export default {
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
+      message: null
     }
   },
   methods: {
     signIn () {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password).then(
         (user) => {
-          localStorage.setItem('uid', user.uid)
-          localStorage.setItem('email', user.email)
           this.$router.push({name: 'questions'})
         },
         (err) => {
@@ -68,39 +58,26 @@ export default {
 </script>
 
 <style scoped>
-html,body {
-  font-family: 'Open Sans', serif;
-  font-size: 14px;
-  font-weight: 300;
-}
-.hero.is-success {
-  background: #F2F6FA;
-}
-.hero .nav, .hero.is-success .nav {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-.box {
-  margin-top: 5rem;
-}
-.avatar {
-  margin-top: -70px;
-  padding-bottom: 20px;
-}
-.avatar img {
-  padding: 5px;
-  background: #fff;
-  border-radius: 50%;
-  -webkit-box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
-  box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
-}
-input {
-  font-weight: 300;
-}
-p {
-  font-weight: 700;
-}
-p.subtitle {
-  padding-top: 1rem;
-}
+.center-block {
+    margin-top: 15%;
+  }
+  h3 {
+    text-align: center;
+  }
+  body {
+    padding-top: 120px;
+    padding-bottom: 40px;
+    background-color: #eee;
+  }
+  .fullscreen_bg {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-image: url('http://cleancanvas.herokuapp.com/img/backgrounds/color-splash.jpg');
+    background-repeat: repeat;
+  }
 </style>
