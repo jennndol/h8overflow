@@ -22,8 +22,9 @@
                 <a class="btn-vote-question" @click="upVote(question.id)">
                   <span class="glyphicon glyphicon-chevron-up"></span>
                 </a>
+                <!-- just show upVotes -->
                 <h1>
-                  {{ upTotal - downTotal }}
+                  {{ voteNumber }}
                 </h1>
                 <a class="btn-vote-question" @click="downVote(question.id)">
                   <span class="glyphicon glyphicon-chevron-down"></span>
@@ -277,6 +278,11 @@ export default {
     },
     answers () {
       return this.$store.state.answers
+    },
+    voteNumber () {
+      return this.votes.map(val => {
+        return val.vote === true
+      }).length
     }
   }
 }
