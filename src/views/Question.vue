@@ -23,7 +23,7 @@
                   <span class="glyphicon glyphicon-chevron-up"></span>
                 </a>
                 <h1>
-                  {{ questionUpVoteTotal - questionDownVoteTotal }}
+                  {{ upTotal - downTotal }}
                 </h1>
                 <a class="btn-vote-question" @click="downVote(question.id)">
                   <span class="glyphicon glyphicon-chevron-down"></span>
@@ -95,9 +95,11 @@ export default {
         description: null,
         isAccepted: false
       },
-      questionUpVoteTotal: 0,
-      questionDownVoteTotal: 0,
-      currentUser: firebase.auth().currentUser
+      votes: [],
+      questionVoteTotal: 0,
+      currentUser: firebase.auth().currentUser,
+      upTotal: 0,
+      downTotal: 0
     }
   },
   methods: {
@@ -125,7 +127,7 @@ export default {
     upVote (id) {
       let currentUser = firebase.auth().currentUser
       db.collection('questions').doc(id).collection('votes')
-        .where('uid', '===', currentUser.uid)
+        .where('uid', '==', currentUser.uid)
         .get()
         .then(snapshot => {
           if (snapshot.docs.length === 0) {
@@ -227,7 +229,6 @@ export default {
         })
     },
     calculateQuestionVotes (questionId) {
-      console.log('WOY')
       db.collection('questions').doc(questionId).collection('votes')
         .get()
         .then(snapshot => {
@@ -236,8 +237,14 @@ export default {
               db.collection('questions')
                 .doc(questionId).collection('votes')
                 .get()
-                .then(docs => {
-                  console.log(docs)
+                .then(snapshot => {
+                  let docs = []
+                  snapshot.forEach(doc => {
+                    let data = doc.data()
+                    data.id = doc.id
+                    docs.push(data)
+                  })
+                  this.votes = docs
                 })
                 .catch(error => {
                   console.log(error)
@@ -246,15 +253,23 @@ export default {
           }
         })
     },
-    questionVotes () {
-      this.calculateQuestionVotes(this.$store.state.question.id)
+    upVotesTotal () {
+      this.upTotal = this.votes.map(val => {
+        return val.vote === true
+      }).length
+    },
+    downVotesTotal () {
+      this.downTotal = this.votes.map(val => {
+        return val.vote === false
+      }).length
     }
   },
   created () {
     this.getQuestion(this.id)
     this.getAnswers(this.id)
-    this.questionVotes()
-    this.calculateQuestionVotes(this.$store.state.question.id)
+    this.calculateQuestionVotes(this.id)
+    this.upVotesTotal()
+    this.downVotesTotal()
   },
   computed: {
     question () {
