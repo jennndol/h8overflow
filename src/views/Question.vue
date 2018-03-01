@@ -22,7 +22,9 @@
                 <a class="btn-vote-question" @click="upVote(question.id)">
                   <span class="glyphicon glyphicon-chevron-up"></span>
                 </a>
-                <h1>10</h1>
+                <h1>
+                  {{ questionUpVoteTotal - questionDownVoteTotal }}
+                </h1>
                 <a class="btn-vote-question" @click="downVote(question.id)">
                   <span class="glyphicon glyphicon-chevron-down"></span>
                 </a>
@@ -54,7 +56,7 @@
                   </div>
                   <div class="col-xs-6">
                     <div class="answer-vote text-right">
-                      {{ questionUpVoteTotal - questionDownVoteTotal }}
+                      {{ 10 }}
                       <a @click="upVoteAnswer(question.id, answer.id)">
                         <span class="glyphicon glyphicon-chevron-up"></span>
                       </a>
@@ -86,7 +88,7 @@ import {
 } from '../firebase'
 
 export default {
-  data() {
+  data () {
     return {
       id: this.$route.params.id,
       form: {
@@ -108,12 +110,12 @@ export default {
     },
     deleteA (questionId, answerId) {
       db.collection('questions').doc(questionId).collection('answers').doc(answerId).delete()
-      .then(payload => {
-        this.$router.push({name: 'questions'})
-      })
-      .catch(error => {
-        console.log(error)
-      })
+        .then(payload => {
+          this.$router.push({name: 'questions'})
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     reply () {
       let form = this.form
@@ -226,7 +228,6 @@ export default {
     },
     calculateQuestionVotes (questionId) {
       console.log('WOY')
-      
       db.collection('questions').doc(questionId).collection('votes')
         .get()
         .then(snapshot => {

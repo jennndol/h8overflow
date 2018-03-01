@@ -23,7 +23,7 @@ import Navbar from './components/Navbar.vue'
 
 export default {
   name: 'createNewQuestion',
-  components:{
+  components: {
     Navbar
   },
   data () {

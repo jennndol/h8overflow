@@ -6,7 +6,6 @@ import SignUp from '@/views/SignUp'
 import CreateNewQuestion from '@/views/CreateNewQuestion'
 import Bucket from '@/views/Bucket'
 import Question from '@/views/Question'
-
 import { firebase } from '../firebase'
 
 Vue.use(Router)
@@ -35,7 +34,7 @@ let router = new Router({
     {
       path: '/',
       component: Bucket,
-      children:[{
+      children: [{
         path: '',
         name: 'questions',
         component: Questions

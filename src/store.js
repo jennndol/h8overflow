@@ -49,7 +49,6 @@ export const store = new Vuex.Store({
           console.log('Error getting documents', err)
         })
     },
-    
     getQuestions: ({ commit }) => {
       dbQuestion.get()
         .then(snapshot => {
@@ -77,9 +76,9 @@ export const store = new Vuex.Store({
     getQuestionVotes: ({commit}, payload) => {
       alert('IM HERE')
       dbQuestion.doc(payload).collection('votes')
-      .onSnapshot(something => {
-        console.log(something)
-      })
+        .onSnapshot(something => {
+          console.log(something)
+        })
     },
     deleteQuestion: ({commit}, payload) => {
       dbQuestion.doc(payload).delete()

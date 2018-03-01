@@ -5,7 +5,7 @@
       <div class="panel-heading">
         <router-link :to="{ name: 'question', params: { id: question.id }}">{{ question.title }}</router-link>
       </div>
-      <div class="panel-body">          
+      <div class="panel-body">
         <p>
           <img class="profile-picture" src="https://api.adorable.io/avatars/285/abott@adorable.png" style="width=50px;">
           {{ question.description }}
